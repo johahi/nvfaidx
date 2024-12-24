@@ -1,142 +1,35 @@
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
 
-# We can likely clean up the meta-package once https://github.com/astral-sh/uv/issues/6935 has a resolution.
 [project]
-name = "bionemo-meta"
+name = "bionemo-noodles"
 readme = "README.md"
-description = "BioNeMo meta-package."
+description = "Python wrapper around [noodles](https://github.com/zaeleus/noodles)."
 authors = [{ name = "BioNeMo Team", email = "bionemofeedback@nvidia.com" }]
 requires-python = ">=3.10"
-classifiers = ["Private :: Do Not Upload", "Programming Language :: Python :: 3.10"]
-license = { file = "LICENSE/license.txt" }
-version = "2.0.0"
+license = { file = "LICENSE" }
+dynamic = ["version"]
 dependencies = [
-    # **ALL** bionemo sub-packages
+    # internal
     'bionemo-core',
-    'bionemo-esm2',
-    'bionemo-example_model',
-    'bionemo-fw',
-    'bionemo-geneformer',
-    'bionemo-geometric',
-    'bionemo-llm',
-    'bionemo-scdl',
-    'bionemo-size-aware-batching',
-    'bionemo-testing',
-    'bionemo-webdatamodule',
     # external
-    'nemo_run',
-    'torch==2.3.*',
-    # internal code
-    "infra-bionemo",
 ]
 
-[project.optional-dependencies]
-build = ['flash-attn', 'pip']
+[tool.maturin]
+bindings = "pyo3"
+# TODO can we provide more compatability?
+compatibility = "linux"
+python-source = "src"
+# we could make this bionemo.noodles.fasta_wrapper, but that would require it to be its own namespaced package.
+module-name = "bionemo.noodles_fasta_wrapper"
+version = { file = "VERSION" }
 
-[tool.uv.workspace]
-members = [
-    "3rdparty/*",
-    "sub-packages/bionemo-*/",
-    "internal/infra-bionemo/",
-]
-
-[tool.uv.sources]
-# external
-nemo_run = { git = "https://github.com/NVIDIA/NeMo-Run", rev = "34259bd3e752fef94045a9a019e4aaf62bd11ce2" }
-# under 3rdparty/
-nemo_toolkit = { workspace = true }
-megatron-core = { workspace = true }
-# in sub-packages/
-bionemo-core = { workspace = true }
-bionemo-esm2 = { workspace = true }
-bionemo-example_model = { workspace = true }
-bionemo-fw = { workspace = true }
-bionemo-geneformer = { workspace = true }
-bionemo-geometric = { workspace = true }
-bionemo-llm = { workspace = true }
-bionemo-noodles = { workspace = true }
-bionemo-scdl = { workspace = true }
-bionemo-size-aware-batching = { workspace = true }
-bionemo-testing = { workspace = true }
-bionemo-webdatamodule = { workspace = true }
-# in internal/
-infra-bionemo = { workspace = true }
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["bionemo.*"]
+namespaces = true
+exclude = ["test*."]
 
 [tool.uv]
-dev-dependencies = [
-    "click",
-    "ipdb",
-    "nbval",
-    "pre-commit",
-    "pyright",
-    "ruff",
-    "tach",
-    "tenacity",
-]
-no-build-isolation-package = ["flash-attn"]
-
-[tool.black]
-line-length = 119
-target-version = ['py310']
-skip-string-normalization = true
-
-[tool.ruff]
-line-length = 119
-
-[tool.ruff.lint]
-ignore = ["C901", "D100", "E501", "E741", "RUF005", "RUF010"]
-select = [
-    "C",   # Pylint conventions
-    "D",   # Documentation formatting
-    "E",   # style stuff, whitespaces
-    "F",   # important pyflakes lints
-    "I",   # import sorting
-    "RUF", # Some Ruff-specific lints, unused noqas, etc.
-    "W",   # Pylint warnings
-]
-
-# Ignore import violations in all `__init__.py` files.
-[tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["D104", "E402", "F401", "F403", "F811"]
-"test_*.py" = ["D"]
-"conftest.py" = ["D"]
-"scripts/*.py" = ["D"]
-
-[tool.ruff.lint.isort]
-lines-after-imports = 2
-known-first-party = ["bionemo", "infra_bionemo"]
-
-[tool.ruff.lint.pydocstyle]
-convention = "google"
-
-[tool.pytest.ini_options]
-norecursedirs = ["3rdparty"]
-addopts = ["--ignore=3rdparty"]
-
-[tool.pyright]
-include = ["./scripts/", "./sub-packages/", "./internal/"]
-exclude = ["*/tests/"]
-executionEnvironments = [
-    { "root" = ".", pythonVersion = "3.10", extraPaths = [
-        # 3rd party, git submodules
-        "./3rdparty/Megatron-LM",
-        "./3rdparty/NeMo",
-        # bionemo sub-packages
-        './sub-packages/bionemo-core/src',
-        './sub-packages/bionemo-esm2/src',
-        './sub-packages/bionemo-example_model/src',
-        './sub-packages/bionemo-fw/src',
-        './sub-packages/bionemo-geneformer/src',
-        './sub-packages/bionemo-geometric/src',
-        './sub-packages/bionemo-llm/src',
-        './sub-packages/bionemo-noodles/src',
-        './sub-packages/bionemo-scdl/src',
-        './sub-packages/bionemo-size-aware-batching/src',
-        './sub-packages/bionemo-testing/src',
-        './sub-packages/bionemo-webdatamodule/src',
-        # internal
-        './internal/infra-bionemo/src',
-    ] },
-]
+cache-keys = [{ git = true }]

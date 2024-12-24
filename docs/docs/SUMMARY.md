@@ -1,5 +1,0 @@
-* [Home](index.md)
-* [User Guide](user-guide/)
-* [Models](models/)
-* [Datasets](datasets/)
-* [API](API_reference/)
