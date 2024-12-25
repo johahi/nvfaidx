@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from bionemo.noodles_fasta_wrapper import (
+from nvfaidx.nvfaidx_wrapper import (
     PyFaidxRecord,
     PyIndexedMmapFastaReader,
     back_transcribe_sequence,
@@ -21,6 +21,8 @@ from bionemo.noodles_fasta_wrapper import (
     reverse_sequence,
     transcribe_sequence,
 )
+
+from .nvfaidx import NvFaidx
 
 
 __all__ = (

@@ -3,16 +3,19 @@ requires = ["maturin>=1.0,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "bionemo-noodles"
+name = "nvfaidx"
 readme = "README.md"
 description = "Python wrapper around [noodles](https://github.com/zaeleus/noodles)."
-authors = [{ name = "BioNeMo Team", email = "bionemofeedback@nvidia.com" }]
-requires-python = ">=3.10"
-license = { file = "LICENSE" }
+authors = [
+    { name = "BioNeMo Team", email = "bionemofeedback@nvidia.com" },
+    { name = "Johannes Hingerl", email = "johannes.hingerl@tum.de" }
+]
+requires-python = ">=3.9"
+license = { file = "LICENSE/license.txt" }
 dynamic = ["version"]
 dependencies = [
     # internal
-    'bionemo-core',
+    # 'bionemo-core',
     # external
 ]
 
@@ -20,16 +23,15 @@ dependencies = [
 bindings = "pyo3"
 # TODO can we provide more compatability?
 compatibility = "linux"
-python-source = "src"
+python-source = "pysrc"
 # we could make this bionemo.noodles.fasta_wrapper, but that would require it to be its own namespaced package.
-module-name = "bionemo.noodles_fasta_wrapper"
+module-name = "nvfaidx.nvfaidx_wrapper"
 version = { file = "VERSION" }
 
 [tool.setuptools.packages.find]
-where = ["src"]
-include = ["bionemo.*"]
+where = ["nvfaidx"]
 namespaces = true
-exclude = ["test*."]
+# exclude = ["test*."]
 
 [tool.uv]
 cache-keys = [{ git = true }]

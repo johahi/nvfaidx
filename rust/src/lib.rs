@@ -178,7 +178,7 @@ impl PyIndexedMmapFastaReader {
 }
 
 #[pymodule]
-fn noodles_fasta_wrapper(_: Python, m: &PyModule) -> PyResult<()> {
+fn nvfaidx_wrapper(_: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<PyIndexedMmapFastaReader>()?;
     m.add_class::<PyFaidxRecord>()?;
     m.add_function(wrap_pyfunction!(complement_sequence, m)?)?;
