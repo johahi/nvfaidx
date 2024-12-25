@@ -1,19 +1,15 @@
-name: Build Wheels
+name: Build and Release Wheels
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  release:
+    types: [published]
 
 jobs:
   build_wheels:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.9', '3.10', '3.11']
+        python-version: ['9', '10', '11']
 
     steps:
       - name: Checkout code
@@ -22,7 +18,7 @@ jobs:
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: 3.${{ matrix.python-version }}
 
       - name: Install Rust stable
         uses: actions-rs/toolchain@v1
@@ -35,10 +31,18 @@ jobs:
           pip install maturin
 
       - name: Build wheels
-        run: maturin build --release
+        run: python3 -m pip wheel .
 
-      - name: Upload wheel artifact
-        uses: actions/upload-artifact@v3
+      - name: List wheels
+        run: |
+          ls -l .
+
+      - name: Upload wheels to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: wheels-${{ matrix.python-version }}
-          path: target/wheels/*.whl
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./nvfaidx-0.0.1-cp3${{ matrix.python-version }}-cp3${{ matrix.python-version }}-linux_x86_64.whl  # Standard relative path
+          asset_name: nvfaidx-0.0.1-cp3${{ matrix.python-version }}-cp3${{ matrix.python-version }}-linux_x86_64.whl
+          asset_content_type: application/zip
