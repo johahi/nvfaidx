@@ -40,5 +40,5 @@ jobs:
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v3
         with:
-          name: wheels
+          name: wheels-${{ matrix.python-version }}
           path: target/wheels/*.whl
