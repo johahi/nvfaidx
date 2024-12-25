@@ -34,11 +34,17 @@ jobs:
         run: maturin build --release
 
       - name: Upload wheels to release
+        run: |
+          wheel_path=$(ls target/wheels/*.whl)
+          echo "::set-output name=wheel_name::$(basename $wheel_path)"
+        id: get_wheel_name
+
+      - name: Upload wheels to release
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: target/wheels/*.whl  # Standard relative path
-          asset_name: ${{ github.event.release.name }}-${{ matrix.python-version }}.whl
+          asset_path: target/wheels/*.whl
+          asset_name: ${{ steps.get_wheel_name.outputs.wheel_name }}
           asset_content_type: application/zip
