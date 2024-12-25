@@ -1,11 +1,11 @@
 [package]
-name = "noodles_fasta_wrapper"
-version = "0.1.0"
+name = "nvfaidx_wrapper"
+version = "0.0.1"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib"]
-name = "noodles_fasta_wrapper"  # The name of the library
+name = "nvfaidx_wrapper"  # The name of the library
 path = "rust/src/lib.rs"        # Path to the library file
 
 [dependencies]
@@ -15,4 +15,4 @@ noodles-core = "*"
 memmap2 = "*"
 
 [package.metadata.pyo3]
-name = "noodles_fasta_wrapper"
+name = "nvfaidx_wrapper"

@@ -33,11 +33,6 @@ jobs:
       - name: Build wheels
         run: maturin build --release
 
-      - name: List files in target/wheels
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ls -l target/wheels/
-      
       - name: Upload wheels to release
         uses: actions/upload-release-asset@v1
         env:
