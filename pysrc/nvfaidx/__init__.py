@@ -24,6 +24,7 @@ from nvfaidx.nvfaidx_wrapper import (
 
 from .nvfaidx import NvFaidx
 
+from .data import GenomeIntervalDataset
 
 __all__ = (
     "PyFaidxRecord",
