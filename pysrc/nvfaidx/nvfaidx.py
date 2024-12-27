@@ -166,6 +166,8 @@ class NvFaidx:
         elif not isinstance(faidx_path, str) and faidx_path is not None:
             raise TypeError(f"faidx_path must be a `str`, `pathlib.Path`, or None. got: {type(faidx_path)}")
 
+        assert not fasta_path.endswith(".gz"), "gzipped FASTA files are not supported."
+
         if ignore_existing_fai:
             self.reader = PyIndexedMmapFastaReader(fasta_path, ignore_existing_fai=ignore_existing_fai)
         elif faidx_path is not None:

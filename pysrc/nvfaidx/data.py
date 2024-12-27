@@ -127,23 +127,14 @@ class FastaInterval():
 
         left_padding = right_padding = 0
 
-        if exists(self.context_length): 
-            if interval_length < self.context_length:
-                extra_seq = self.context_length - interval_length
+        if exists(self.context_length) and interval_length != self.context_length:
+            extra_seq = self.context_length - interval_length
 
-                extra_left_seq = extra_seq // 2
-                extra_right_seq = extra_seq - extra_left_seq
+            extra_left_seq = extra_seq // 2
+            extra_right_seq = extra_seq - extra_left_seq
 
-                start -= extra_left_seq
-                end += extra_right_seq
-            elif interval_length > self.context_length:
-                extra_seq = interval_length - self.context_length
-
-                extra_left_seq = extra_seq // 2
-                extra_right_seq = extra_seq - extra_left_seq
-
-                start += extra_left_seq
-                end -= extra_right_seq
+            start -= extra_left_seq
+            end += extra_right_seq
 
         if start < 0:
             left_padding = -start
