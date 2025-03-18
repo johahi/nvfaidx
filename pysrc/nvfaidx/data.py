@@ -220,6 +220,6 @@ class GenomeIntervalDataset(Dataset):
         chr_name, start, end = (interval[0], interval[1], interval[2])
         chr_name = self.chr_bed_to_fasta_map.get(chr_name, chr_name)
         if self.sample_in_frame and end - start > self.context_length:
-            start = random.randint(start, end - self.context_length)
+            start = randint(start, end - self.context_length)
             end = start + self.context_length
         return self.fasta(chr_name, start, end, return_augs = self.return_augs)
