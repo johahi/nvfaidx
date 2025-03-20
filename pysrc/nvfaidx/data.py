@@ -37,7 +37,7 @@ seq_indices_embed[ord('C')] = 1
 seq_indices_embed[ord('G')] = 2
 seq_indices_embed[ord('T')] = 3
 seq_indices_embed[ord('N')] = 4
-seq_indices_embed[ord('.')] = 5 # changed, for it to work with nn.Embedding
+seq_indices_embed[ord('.')] = 4 # changed, for it to work with nn.Embedding
 
 one_hot_embed = torch.zeros(256, 4)
 one_hot_embed[ord('a')] = torch.Tensor([1., 0., 0., 0.])
@@ -143,6 +143,16 @@ class FastaInterval():
         if end > chromosome_length:
             right_padding = end - chromosome_length
             end = chromosome_length
+        if start > chromosome_length:
+            start  = chromosome_length - self.context_length
+            right_padding = 0
+            left_padding = 0
+            end = chromosome_length
+        if end < 0:
+            start = 0
+            end = self.context_length
+            right_padding = 0
+            left_padding = 0
 
         seq = ('.' * left_padding) + str(chromosome[start:end]) + ('.' * right_padding)
 
@@ -207,10 +217,42 @@ class GenomeIntervalDataset(Dataset):
             shift_augs = shift_augs,
             rc_aug = rc_aug
         )
+        if context_length is not None:
 
-        self.return_augs = return_augs
-        self.sample_in_frame = sample_in_frame
+            def is_valid_interval(row):
+                try:
+                    chrom_bed = row[0] # Chromosome name from BED file (assuming positional access)
+                    start_bed = row[1]
+                    end_bed = row[2]
+
+                    chrom_fasta_length = len(self.fasta.seqs[chrom_bed])
+
+                    if chrom_fasta_length is None:
+                        print(f"Warning: Chromosome '{chrom_bed}' not found in FASTA lengths.")
+                        return False
+
+                    interval_length = end_bed - start_bed
+                    is_valid = interval_length <= chrom_fasta_length and context_length <= chrom_fasta_length
+                    # print(f"Interval: {chrom_bed}:{start_bed}-{end_bed}, Length: {interval_length}, Chromosome Length: {chrom_fasta_length}, Valid: {is_valid}")
+                    return is_valid
+                except Exception as e:
+                    # print(f"Error processing row: {row}, Error: {e}")
+                    return False
+
+            original_length = len(df)
+            # print("Creating boolean mask for filtering...")
+            bool_mask_list = []
+            for row in df.rows(named=False): # Iterate over DataFrame rows as lists
+                bool_mask_list.append(is_valid_interval(row)) # Apply is_valid_interval to each row and collect booleans
+            valid_interval_mask = pl.Series(bool_mask_list, dtype=pl.Boolean) # Create Polars boolean Series
+
+            # print("Applying filter using boolean mask...")
+            self.df = df.filter(valid_interval_mask) # Filter DataFrame using the boolean Serieser with boolean Series
+            # print("Filter application complete.")
         self.context_length = context_length
+        self.sample_in_frame = sample_in_frame
+        self.return_augs = return_augs
+
 
     def __len__(self):
         return len(self.df)
