@@ -8,7 +8,7 @@ import polars as pl
 import numpy as np
 from random import randrange, random, randint
 from pathlib import Path
-from .nvfaidx import NvFaidx
+import os
 
 # helper functions
 
@@ -100,10 +100,13 @@ class FastaInterval():
         shift_augs = None,
         rc_aug = False
     ):
+        from .nvfaidx import NvFaidx
         fasta_file = Path(fasta_file)
         assert fasta_file.exists(), 'path to fasta file must exist'
-
-        self.seqs = NvFaidx(str(fasta_file))
+        if os.path.exists(f"{fasta_file}.fai"):
+            self.seqs = NvFaidx(str(fasta_file), faidx_path = f"{fasta_file}.fai", ignore_existing_fai = False)
+        else:
+            self.seqs = NvFaidx(str(fasta_file))
         self.return_seq_indices = return_seq_indices
         self.context_length = context_length
         self.shift_augs = shift_augs
@@ -232,7 +235,7 @@ class GenomeIntervalDataset(Dataset):
                         return False
 
                     interval_length = end_bed - start_bed
-                    is_valid = interval_length <= chrom_fasta_length and context_length <= chrom_fasta_length
+                    is_valid = interval_length <= chrom_fasta_length and context_length <= chrom_fasta_length and start_bed < end_bed and start_bed > 0
                     # print(f"Interval: {chrom_bed}:{start_bed}-{end_bed}, Length: {interval_length}, Chromosome Length: {chrom_fasta_length}, Valid: {is_valid}")
                     return is_valid
                 except Exception as e:
@@ -249,6 +252,7 @@ class GenomeIntervalDataset(Dataset):
             # print("Applying filter using boolean mask...")
             self.df = df.filter(valid_interval_mask) # Filter DataFrame using the boolean Serieser with boolean Series
             # print("Filter application complete.")
+            print (f"Original dataset size: {original_length}, now: {len(self.df)}")
         self.context_length = context_length
         self.sample_in_frame = sample_in_frame
         self.return_augs = return_augs
@@ -265,3 +269,4 @@ class GenomeIntervalDataset(Dataset):
             start = randint(start, end - self.context_length)
             end = start + self.context_length
         return self.fasta(chr_name, start, end, return_augs = self.return_augs)
+
